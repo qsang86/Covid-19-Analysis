@@ -36,3 +36,52 @@ def open_api_reader():
     print('number of rows: ', len(result_df.index))
 
     return result_df
+
+
+!pip install geopy
+import numpy as np
+
+def get_geocode(city): 
+    try: 
+        geoloc = Nominatim(user_agent="covid19") 
+        
+        ##timeout = set unlimited time to run.
+        ##too much time taken -> going to improve
+        return geoloc.geocode(city, timeout=None) 
+    except GeocoderTimedOut: 
+        return get_geocode(city)    
+
+
+def add_lat_long(df):
+	longitude = []
+	latitude = []
+
+	for i in (df):
+	    if get_geocode(i) != None:
+	        location = get_geocode(i)
+	         
+	        latitude.append(location.latitude)
+	        longitude.append(location.longitude)
+	    
+	    else:
+	        latitude.append(np.nan)
+	        longitude.append(np.nan)
+
+	df['latitude'] = latitude
+	df['longitude'] = longtude
+	df = df.dropna()
+	return df
+
+
+def main():
+
+	df_covid = open_api_reader()
+	df_covid = result_df[['areaNmEn', 'nationNmEn', 'createDt', 'natDeathCnt', 'natDeathRate', 'natDefCnt']]
+	add_lat_long(df_covid)
+	df_covid.to_excel('./covid_19.xlsx', index = False)
+
+
+if __name__ == '__main__':
+	main()
+
+
